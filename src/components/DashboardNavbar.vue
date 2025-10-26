@@ -1,0 +1,32 @@
+<template>
+  <nav class="flex items-center justify-between py-4 px-6 max-w-[1440px] mx-auto w-full bg-white shadow-md rounded-b-2xl">
+    <!-- Left: Logo -->
+    <h1 class="text-2xl font-bold text-blue-600">TicketWave</h1>
+
+    <!-- Right: Logout Button -->
+    <button
+      @click="handleLogout"
+      class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition"
+    >
+      Logout
+    </button>
+  </nav>
+</template>
+
+<script>
+import { useRouter } from 'vue-router';
+import { logout } from '../utils/auth';
+
+export default {
+  setup() {
+    const router = useRouter();
+
+    const handleLogout = () => {
+      logout();
+      router.push('/'); // Redirect to landing after logout
+    };
+
+    return { handleLogout };
+  },
+};
+</script>
