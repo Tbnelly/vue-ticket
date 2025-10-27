@@ -12,7 +12,12 @@
     </div>
 
     <main class="flex-1 max-w-[1440px] mx-auto w-full px-6 py-10">
-      <h2 class="text-3xl font-bold text-gray-800 mb-10">Dashboard</h2>
+      <div class="flex justify-between items-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
+        <p class="text-gray-600 text-sm">
+          Welcome, <span class="font-medium">{{ userEmail }}</span>
+        </p>
+      </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -64,13 +69,16 @@ export default {
   setup() {
     const router = useRouter();
     const stats = ref({ total: 0, open: 0, in_progress: 0, closed: 0 });
+    const userEmail = ref("");
 
-    const calculateStats = () => {
-      const tickets = getTickets();
-      stats.value.total = tickets.length;
-      stats.value.open = tickets.filter(t => t.status === "open").length;
-      stats.value.in_progress = tickets.filter(t => t.status === "in_progress").length;
-      stats.value.closed = tickets.filter(t => t.status === "closed").length;
+    const calculateStats = (email) => {
+      const tickets = getTickets() || [];
+      const userTickets = tickets.filter(t => t.owner === email);
+
+      stats.value.total = userTickets.length;
+      stats.value.open = userTickets.filter(t => t.status === "open").length;
+      stats.value.in_progress = userTickets.filter(t => t.status === "in_progress").length;
+      stats.value.closed = userTickets.filter(t => t.status === "closed").length;
     };
 
     const handleLogout = () => {
@@ -79,14 +87,17 @@ export default {
     };
 
     onMounted(() => {
-      if (!isAuthenticated()) {
+      const currentUser = JSON.parse(localStorage.getItem("current_user"));
+      if (!currentUser || !isAuthenticated()) {
         router.push("/auth/login");
-      } else {
-        calculateStats();
+        return;
       }
+
+      userEmail.value = currentUser.email;
+      calculateStats(currentUser.email);
     });
 
-    return { stats, handleLogout };
+    return { stats, handleLogout, userEmail };
   },
 };
 </script>
